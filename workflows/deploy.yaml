@@ -1,0 +1,32 @@
+name: Deploy to AKS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Kubernetes
+      uses: Azure/setup-kubectl@v1
+      with:
+        version: 'v1.20.0'
+
+    - name: Set up Azure CLI
+      uses: Azure/cli@v1
+
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Get AKS Credentials
+      run: az aks get-credentials --resource-group testvirtualmachinegroup --name myAKSCluster
+
+    - name: Deploy to AKS
+      run: kubectl apply -f k8s/deployment.yaml
